@@ -30,3 +30,165 @@
 Ветка - это версия (копия) проекта. В главное ветке `master` будет лежать данный `readme.md` файл и также папки с номерами работ. В этих папках будут лежать свои readme файлы с описанием заданий, а также дополнительные материалы. 
 
 **Ваша ветка** будет копией ветки `master`, но с решениями. То есть, вы можете создавать проекты прямо в папках с номерами работ. Так что в итоге у всех в ветке будет `readme.md` файл и куча папок, по одной на каждое задание.
+
+# Вспомогательный материал
+
+## Ссылки
+
+- [Стратегии управления ресурсами](https://habr.com/post/425837/)
+- [Move-семантика](https://habr.com/post/226229/)
+
+## Код с занятия
+
+
+```cpp
+#include <iostream> 
+#include <vector> 
+#include <string> 
+#include <initializer_list> 
+
+using namespace std;
+
+class Vector
+{
+public:
+	Vector()
+	{}
+	Vector(const Vector& vec) = delete;
+	Vector& operator=(const Vector& vec) = delete;
+	Vector(Vector&& vec) :
+		ms(vec.ms), size(vec.size)
+	{
+		vec.ms = nullptr;
+		vec.size = 0;
+	}
+	Vector& operator=(Vector&& vec)
+	{
+		if (ms != nullptr) delete[] ms;
+
+		ms = vec.ms;
+		size = vec.size;
+
+		vec.ms = nullptr;
+		vec.size = 0;
+
+		return *this;
+	}
+
+	Vector(const initializer_list<int>& list)
+	{
+		ms = new int[list.size()];
+		size = 0;
+		for (const auto& a : list)
+		{
+			ms[size] = a;
+			++size;
+		}
+	}
+
+	~Vector()
+	{
+		if (ms != nullptr) delete[] ms;
+	}
+
+	void push_back(const int n)
+	{
+		int* p = new int[size + 1];
+		for (int i = 0; i < size; ++i)
+		{
+			p[i] = ms[i];
+		}
+
+		if (ms != nullptr) delete[] ms;
+		ms = p;
+		ms[size] = n;
+		++size;
+	}
+	
+	const int* begin() const
+	{
+		return ms;
+	}
+	const int* end() const
+	{
+		return ms + size;;
+	}
+
+	void pop_back()
+	{
+		if (size == 0) throw logic_error("Pop from empty vector");
+		int* p = new int[size - 1];
+		for (int i = 0; i < size - 1; ++i)
+		{
+			p[i] = ms[i];
+		}
+
+		if (ms != nullptr) delete[] ms;
+		ms = p;
+		--size;
+	}
+	size_t Size() const
+	{
+		return size;
+	}
+
+	int& operator[](const int index)
+	{
+		return ms[index];
+	}
+	int operator[](const int index) const
+	{
+		return ms[index];
+	}
+
+	bool empty() const
+	{
+		return size == 0;
+	}
+
+	explicit operator bool()
+	{
+		return !empty();
+	}
+
+private:
+	size_t size = 0;
+	int* ms = nullptr;
+};
+
+ostream& operator<<(ostream& stream, const Vector& vec)
+{
+	for (auto a : vec)
+	{
+		stream << a << " ";
+	}
+	return stream;
+}
+
+
+void swap(Vector& a, Vector& b) noexcept
+{
+	Vector temp(move(a));
+	a = move(b);
+	b = move(temp);
+}
+
+Vector Generate()
+{
+	Vector v;
+	v.push_back(42);
+	v.push_back(43);
+	v.push_back(44);
+	return v;
+}
+
+int main()
+{
+	Vector v = { 9, 90, 88, 77, 44, 2, 1 };
+	cout << v;
+
+	cout << "\nThe end!" << endl;
+	system("pause > NUL");
+	return 0;
+}
+```
