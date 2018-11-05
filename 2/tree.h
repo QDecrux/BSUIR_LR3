@@ -84,7 +84,7 @@ namespace tree
 			return Find(root_, key);
 		}
 		template<typename Ptr>
-		static auto& Find(Ptr& root, int key)
+		static Ptr& Find(Ptr& root, int key)
 		{
 			if (root.Empty()) return root;
 			if (root->data.first == key) return root;
